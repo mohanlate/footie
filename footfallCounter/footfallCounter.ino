@@ -21,52 +21,36 @@ void setup () {
   pinMode(ledPin, OUTPUT);
 
   u1 = u2 = 0;
-  WhichSensorIsSet = 0;
-  JustHadACountOn = 0;    //used to avoid case where person has crossed from u1 to u2, got counted, but still has not left u2 and so u2 is still read as tripped.
+  WhichSensorIsSet = 0;    // this stored the name of the sensor that has been tripped first (of the two)
+  
+  /*used to avoid case where person has crossed from u1 to u2, got counted, 
+  but still has not left u2 and so u2 is still read as tripped.*/
+  JustHadACountOn = 0;
 }
 
 
 void loop () {
 
-/*************
- If u1 has tripped {
-   and firstToTrip was u2, {
-    then we have goingIN++, firstToTrip=""
-   } else {
-     firstToTrip = "u1"
-   }
- }  
-  
- if u2 has tripped {
-   if firstToTrip="u1" {
-     goingOUT++;
-     firstToTrip = "";
-   } else {
-     firstToTrip = "u2";
-   }
- 
- }  
-**************/
-
   ping();
-  if(u1){                                  //u1 has tripped
-    if(WhichSensorIsSet == 2){               //u2 was already tripped. so someone came in from u2 through u1
+
+  if(u1){                                 //u1 has tripped
+    if(WhichSensorIsSet == 2){            //u2 was already tripped. so someone came in from u2 through u1
       goingIN++; 
-      WhichSensorIsSet = 0;
+      WhichSensorIsSet = 0;               // reset: we have a count!
       JustHadACountOn = 1;
     } else {
-      WhichSensorIsSet = 1;
+      WhichSensorIsSet = 1;               // store 1 because u1 sensor is the first to trip
       JustHadACountOn = 0;
     }
   }
 
   if(u2){                                  //u1 has tripped
-    if(WhichSensorIsSet == 1){               //u2 was already tripped. so someone came in from u2 through u1
+    if(WhichSensorIsSet == 1){             //u2 was already tripped. so someone came in from u2 through u1
       goingOUT++; 
-      WhichSensorIsSet = 0;
+      WhichSensorIsSet = 0;                // reset: we have a count !
       JustHadACountOn = 2;
     } else {
-      WhichSensorIsSet = 2;
+      WhichSensorIsSet = 2;                //store 2 because u2 was the first to trip
       JustHadACountOn = 0;
     }
   }
