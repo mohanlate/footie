@@ -4,8 +4,6 @@
 #define trigPin2 5
 #define echoPin2 4
 
-#define ledPin 8
-
   int duration, distance, duration2, distance2, whichTripped;
   int u1, u2, goingIN, goingOUT;  
   int WhichSensorIsSet, JustHadACountOn;
@@ -18,7 +16,7 @@ void setup () {
   pinMode(echoPin, INPUT);
   pinMode(trigPin2, OUTPUT);
   pinMode(echoPin2, INPUT);
-  pinMode(ledPin, OUTPUT);
+
 
   u1 = u2 = 0;
   WhichSensorIsSet = 0;    // this stored the name of the sensor that has been tripped first (of the two)
@@ -33,7 +31,7 @@ void loop () {
 
   ping();
 
-  if(u1){                                 //u1 has tripped
+  if(u1 == 1){                                 //u1 has tripped
     if(WhichSensorIsSet == 2){            //u2 was already tripped. so someone came in from u2 through u1
       goingIN++; 
       WhichSensorIsSet = 0;               // reset: we have a count!
@@ -44,7 +42,7 @@ void loop () {
     }
   }
 
-  if(u2){                                  //u1 has tripped
+  if(u2 == 1){                                  //u1 has tripped
     if(WhichSensorIsSet == 1){             //u2 was already tripped. so someone came in from u2 through u1
       goingOUT++; 
       WhichSensorIsSet = 0;                // reset: we have a count !
@@ -58,8 +56,8 @@ void loop () {
   Serial.print("WhichSensorIsSet:");
   Serial.println(WhichSensorIsSet);
 
-  Serial.print("JustHadACountOn:");
-  Serial.println(JustHadACountOn);
+//  Serial.print("JustHadACountOn:");
+//  Serial.println(JustHadACountOn);
 
   Serial.print("u1:");
   Serial.println(u1);
@@ -96,25 +94,25 @@ int ping() {
   distance2 = (duration2/2) / 29.1;
 
   
-  Serial.print("Sensor 1 distance: ");
-  Serial.print(distance);
-  Serial.println(" cms");
+//  Serial.print("Sensor 1 distance: ");
+//  Serial.print(distance);
+//  Serial.println(" cms");
 
-  Serial.print("Sensor 2 distance: ");
-  Serial.print(distance2);
-  Serial.println(" cms");
+//  Serial.print("Sensor 2 distance: ");
+//  Serial.print(distance2);
+//  Serial.println(" cms");
 
   if(distance < 50) {
-    if(JustHadACountOn == 0){
+//    if(JustHadACountOn == 0){
       u1 = 1;
-    }
+//    }
     
   }
 
   if(distance2 < 50) {
-    if(JustHadACountOn == 0){
+//    if(JustHadACountOn == 0){
       u2 = 1;    
-    }
+//    }
   }
 
 }

@@ -49,34 +49,6 @@ void setup () {
 
 
 void loop () {
-
-  ping();
-
-  if(u1){                                 //u1 has tripped
-    if(WhichSensorIsSet == 2){            //u2 was already tripped. so someone came in from u2 through u1
-      goingIN++; 
-      WhichSensorIsSet = 0;               // reset: we have a count!
-      JustHadACountOn = 1;                // set to 1 because person is standing on u1
-    } else {
-      WhichSensorIsSet = 1;               // store 1 because u1 sensor is the first to trip
-      JustHadACountOn = 0;
-    }
-  }
-
-  if(u2){                                  //u1 has tripped
-    if(WhichSensorIsSet == 1){             //u2 was already tripped. so someone came in from u2 through u1
-      goingOUT++; 
-      WhichSensorIsSet = 0;                // reset: we have a count !
-      JustHadACountOn = 2;                 // set to 2 because person is standing on u2
-    } else {
-      WhichSensorIsSet = 2;                //store 2 because u2 was the first to trip
-      JustHadACountOn = 0;
-    }
-  }
-
-
-
-  // listen for incoming clients
   EthernetClient client = server.available();
   if (client) {
     Serial.println("new client");
@@ -93,41 +65,7 @@ void loop () {
           client.println();
           client.println("<!DOCTYPE HTML>");
           client.println("<html>");
-          client.print("WhichSensorIsSet:");
-          client.println(WhichSensorIsSet);
-          client.print("JustHadACountOn:");
-          client.println(JustHadACountOn);
-          client.print("u1:");
-          client.println(u1);
-          client.print("u2:");
-          client.println(u2);
-          client.print("goingIN:");
-          client.println(goingIN);
-          client.print("goingOUT:");
-          client.println(goingOUT);
 
-          client.println("</html>");
-          break;
-        }
-        if (c == '\n') {
-          // you're starting a new line
-          currentLineIsBlank = true;
-        } 
-        else if (c != '\r') {
-          // you've gotten a character on the current line
-          currentLineIsBlank = false;
-        }
-      }
-    }
-    // give the web browser time to receive the data
-    delay(1);
-    // close the connection:
-    client.stop();
-    Serial.println("client disonnected");
-  }
-}
-
-int ping() {
   u1 = u2 = 0;  //reset sensors. This ensures that only the tripped sensor(s) are set in each loop
 
   digitalWrite(trigPin, HIGH);
@@ -147,27 +85,110 @@ int ping() {
   distance2 = (duration2/2) / 29.1;
 
   
-  Serial.print("Sensor 1 distance: ");
-  Serial.print(distance);
-  Serial.println(" cms");
+  client.print("Sensor 1 distance: ");
+  client.print(distance);
+  client.println(" cms");
+  client.println("<br />");
+  client.print("Sensor 2 distance: ");
+  client.print(distance2);
+  client.println(" cms");
+  client.println("<br />");
 
-  Serial.print("Sensor 2 distance: ");
-  Serial.print(distance2);
-  Serial.println(" cms");
-
+/************************************************************************************************
+The following logic sets one direction count only. 
+The direction is the direction of first person to enter 
+This has been commented because now, we have a 2s delay when we have a person count.
+This delay is to ensure that person is stil not standing in the way and has cleared out.
+If not, it will be considered as next entry.
+*************************************************************************************************/
   if(distance < 50) {
-    if(JustHadACountOn == 1){
-      /*this mean person is still standing on u1*/
+    if(JustHadACountOn != 1){
+      /*ONLY trigger if the person is NOT still standing on u1*/
       u1 = 1;
     }
-    
   }
 
   if(distance2 < 50) {
-    if(JustHadACountOn == 2){
-      /*this mean person is still standing on u2*/
+    if(JustHadACountOn != 2){
+      /*ONLY trigger if the person is NOT still standing on u2*/
       u2 = 1;    
     }
   }
+/************************** end of the block comment ***********************************************/  
 
+  if(distance < 50) {
+      u1 = 1;
+  }
+  if(distance2 < 50) {
+      u2 = 1;    
+  }  
+
+
+  if(u1){                                 //u1 has tripped
+    if(WhichSensorIsSet == 2){            //u2 was already tripped. so someone came in from u2 through u1
+      goingIN++; 
+      WhichSensorIsSet = 0;               // reset: we have a count!
+      delayMicroseconds(2000);            //give person some time to clear out
+      JustHadACountOn = 1;                // set to 1 because person is standing on u1
+    } else {
+      WhichSensorIsSet = 1;               // store 1 because u1 sensor is the first to trip
+      JustHadACountOn = 0;
+    }
+  }
+
+  if(u2){                                  //u1 has tripped
+    if(WhichSensorIsSet == 1){             //u2 was already tripped. so someone came in from u2 through u1
+      goingOUT++; 
+      WhichSensorIsSet = 0;                // reset: we have a count !
+      delayMicroseconds(2000);            //give person some time to clear out
+      JustHadACountOn = 2;                 // set to 2 because person is standing on u2
+    } else {
+      WhichSensorIsSet = 2;                //store 2 because u2 was the first to trip
+      JustHadACountOn = 0;
+    }
+  }
+
+
+
+  // listen for incoming clients
+          client.print("WhichSensorIsSet:");
+          client.println(WhichSensorIsSet);
+  client.println("<br />");
+          client.print("JustHadACountOn:");
+          client.println(JustHadACountOn);
+  client.println("<br />");
+          client.print("u1:");
+          client.println(u1);
+  client.println("<br />");
+          client.print("u2:");
+          client.println(u2);
+  client.println("<br />");
+          client.print("goingIN:");
+          client.println(goingIN);
+  client.println("<br />");
+          client.print("goingOUT:");
+          client.println(goingOUT);
+  client.println("<br />");
+
+          client.println("</html>");
+          break;
+        }
+        if (c == '\n') {
+          // you're starting a new line
+          currentLineIsBlank = true;
+        } 
+        else if (c != '\r') {
+          // you've gotten a character on the current line
+          currentLineIsBlank = false;
+        }
+      }
+    }
+    // give the web browser time to receive the data
+    //delay(1);
+    // close the connection:
+    client.stop();
+    Serial.println("client disonnected");
+  }
 }
+
+
