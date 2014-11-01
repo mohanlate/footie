@@ -17,7 +17,7 @@ String records = "0";
 String dataString = "";
 
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-char server[] = "api.smartbot.in/footie/";    // name address for Google (using DNS)
+char server[] = "api.smartbot.in";    // name address for Google (using DNS)
 IPAddress ip(192,168,0,177);
 
 EthernetClient client;
@@ -108,21 +108,27 @@ void loop () {
 
   /**** Store to SD only after 20 or so loops. Ideally, every 60 mins. ********/
   if (isTimeToSD == 20 ){
-    dataString = "'data':{'Date': '" + getDate() + "', 'Time': '" + getTime() + "', 'TotalIN':'" + goingIN + "', 'TotalOUT': '" + goingOUT + "'},";
-    fwriteToSD();
+     fwriteToSD();
+  /*** send to server***/
+    sendToWeb();
     isTimeToSD = 0;
-    //records = records + records.toInt() + 1;
-  } else {
+  } 
+  else {
     isTimeToSD++;
   }
-  
-  sendToWeb(); 
+
+ 
  
   delay(1000);
 }
 
 
 int fwriteToSD(){
+   
+//  dataString = "'data':{'Date': '" + getDate() + "', 'Time': '" + getTime() + "', 'TotalIN':'" + goingIN + "', 'TotalOUT': '" + goingOUT + "'},";
+  dataString = "testing";
+ 
+ 
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
   File dataFile = SD.open("footie/datalog.txt", FILE_WRITE);
@@ -138,7 +144,7 @@ int fwriteToSD(){
   else {
     Serial.println("error opening footie/datalog.txt");
   } 
-
+ 
 }
 
 
@@ -193,17 +199,20 @@ String getTime(){
   return "20:00";
 }
 
+
 int sendToWeb() {
  // if you get a connection, report back via serial:
   if (client.connect(server, 80)) {
     Serial.println("connected");
  
     // Make a HTTP request:
-    client.print("GET /?TotalIN=");
+    client.println("GET /footie/?TotalIN=1900&TotalOUT=900 HTTP/1.1");
+/*    client.print("GET /?TotalIN=");
     client.print(goingIN);
     client.print("&TotalOUT=");
     client.println(goingOUT);
-    client.println("Host: api.smartbot.in/footie");
+*/
+    client.println("Host: api.smartbot.in");
     client.println("Connection: close");
     client.println();
   } 
@@ -226,7 +235,7 @@ int sendToWeb() {
     client.stop();
 
     // do nothing forevermore:
-    while(true);
+    //while(true);
   }
  
 }
