@@ -111,6 +111,7 @@ void loop () {
      fwriteToSD();
   /*** send to server***/
     sendToWeb();
+    goingIN = goingOUT = 0;  //reset the count 
     isTimeToSD = 0;
   } 
   else {
@@ -206,12 +207,12 @@ int sendToWeb() {
     Serial.println("connected");
  
     // Make a HTTP request:
-    client.println("GET /footie/?TotalIN=1900&TotalOUT=900 HTTP/1.1");
-/*    client.print("GET /?TotalIN=");
+//    client.println("GET /footie/?TotalIN=1900&TotalOUT=900 HTTP/1.1");
+    client.print("GET /footie/?TotalIN=");
     client.print(goingIN);
     client.print("&TotalOUT=");
-    client.println(goingOUT);
-*/
+    client.print(goingOUT);
+    client.println(" HTTP/1.1");
     client.println("Host: api.smartbot.in");
     client.println("Connection: close");
     client.println();
@@ -229,13 +230,12 @@ int sendToWeb() {
   }
 
   // if the server's disconnected, stop the client:
-  if (!client.connected()) {
+//  if (!client.connected()) {
     Serial.println();
     Serial.println("disconnecting.");
     client.stop();
 
     // do nothing forevermore:
     //while(true);
-  }
- 
+ // }
 }
