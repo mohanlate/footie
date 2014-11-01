@@ -1,0 +1,7 @@
+[01-Nov-2014 13:15:09 America/Denver] PHP Notice:  Undefined index: TotalIN in /home5/myfivey1/public_html/api/footie/index.php on line 3
+[01-Nov-2014 13:15:09 America/Denver] PHP Notice:  Undefined index: TotalOUT in /home5/myfivey1/public_html/api/footie/index.php on line 4
+[01-Nov-2014 13:15:46 America/Denver] PHP Notice:  Undefined index: TotalIN in /home5/myfivey1/public_html/api/footie/index.php on line 3
+[01-Nov-2014 13:15:46 America/Denver] PHP Notice:  Undefined index: TotalOUT in /home5/myfivey1/public_html/api/footie/index.php on line 4
+[01-Nov-2014 13:17:44 America/Denver] PHP Notice:  Undefined index: TotalIN in /home5/myfivey1/public_html/api/footie/index.php on line 3
+[01-Nov-2014 13:17:44 America/Denver] PHP Notice:  Undefined index: TotalOUT in /home5/myfivey1/public_html/api/footie/index.php on line 4
+[01-Nov-2014 13:38:23 America/Denver] PHP Parse error:  syntax error, unexpected '(', expecting ']' in /home5/myfivey1/public_html/api/footie/index.php on line 20

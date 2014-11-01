@@ -4,8 +4,8 @@
 #define trigPin 3
 #define echoPin 2
 
-#define trigPin2 5
-#define echoPin2 4
+#define trigPin2 6
+#define echoPin2 5
 
 
 byte mac[] = { 
@@ -101,19 +101,19 @@ This has been commented because now, we have a 2s delay when we have a person co
 This delay is to ensure that person is stil not standing in the way and has cleared out.
 If not, it will be considered as next entry.
 *************************************************************************************************/
-  if(distance < 50) {
-    if(JustHadACountOn != 1){
+//  if(distance < 50) {
+//    if(JustHadACountOn != 1){
       /*ONLY trigger if the person is NOT still standing on u1*/
-      u1 = 1;
-    }
-  }
+//      u1 = 1;
+//    }
+ // }
 
-  if(distance2 < 50) {
-    if(JustHadACountOn != 2){
+//  if(distance2 < 50) {
+//    if(JustHadACountOn != 2){
       /*ONLY trigger if the person is NOT still standing on u2*/
-      u2 = 1;    
-    }
-  }
+//      u2 = 1;    
+ //   }
+ // }
 /************************** end of the block comment ***********************************************/  
 
   if(distance < 50) {
@@ -128,7 +128,7 @@ If not, it will be considered as next entry.
     if(WhichSensorIsSet == 2){            //u2 was already tripped. so someone came in from u2 through u1
       goingIN++; 
       WhichSensorIsSet = 0;               // reset: we have a count!
-      delayMicroseconds(2000);            //give person some time to clear out
+      delay(200);            //give person some time to clear out
       JustHadACountOn = 1;                // set to 1 because person is standing on u1
     } else {
       WhichSensorIsSet = 1;               // store 1 because u1 sensor is the first to trip
@@ -140,7 +140,7 @@ If not, it will be considered as next entry.
     if(WhichSensorIsSet == 1){             //u2 was already tripped. so someone came in from u2 through u1
       goingOUT++; 
       WhichSensorIsSet = 0;                // reset: we have a count !
-      delayMicroseconds(2000);            //give person some time to clear out
+      delay(2000);            //give person some time to clear out
       JustHadACountOn = 2;                 // set to 2 because person is standing on u2
     } else {
       WhichSensorIsSet = 2;                //store 2 because u2 was the first to trip

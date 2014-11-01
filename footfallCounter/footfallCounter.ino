@@ -1,23 +1,53 @@
+#include <SPI.h>
+#include <Ethernet.h>
+#include <SD.h>
+
+const int chipSelect = 4;
+
 #define trigPin 3
 #define echoPin 2
+#define trigPin2 6
+#define echoPin2 5
 
-#define trigPin2 5
-#define echoPin2 4
+int duration, distance, duration2, distance2, whichTripped;
+int u1, u2, goingIN, goingOUT;  
+int WhichSensorIsSet, JustHadACountOn;
+int isTimeToSD = 0;
+String records = "0";
+String dataString = "";
 
-  int duration, distance, duration2, distance2, whichTripped;
-  int u1, u2, goingIN, goingOUT;  
-  int WhichSensorIsSet, JustHadACountOn;
-  
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+char server[] = "api.smartbot.in/footie/";    // name address for Google (using DNS)
+IPAddress ip(192,168,0,177);
 
+EthernetClient client;
 
 void setup () {
   Serial.begin(9600);
+  Serial.print("Initializing SD card...");
+  pinMode(10, OUTPUT);
+  
+  if (!SD.begin(chipSelect)) {
+    Serial.println("Card failed, or not present");
+    return;
+  }
+  Serial.println("card initialized.");
+
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   pinMode(trigPin2, OUTPUT);
   pinMode(echoPin2, INPUT);
 
+  // start the Ethernet connection:
+  if (Ethernet.begin(mac) == 0) {
+    Serial.println("Failed to configure Ethernet using DHCP");
+    Ethernet.begin(mac, ip);
+  }
+  // give the Ethernet shield a second to initialize:
+  delay(1000);
+  Serial.println("connecting...");
 
+  
   u1 = u2 = 0;
   WhichSensorIsSet = 0;    // this stored the name of the sensor that has been tripped first (of the two)
   
@@ -25,6 +55,8 @@ void setup () {
   but still has not left u2 and so u2 is still read as tripped.*/
   JustHadACountOn = 0;
 }
+
+
 
 
 void loop () {
@@ -36,6 +68,7 @@ void loop () {
       goingIN++; 
       WhichSensorIsSet = 0;               // reset: we have a count!
       JustHadACountOn = 1;
+      delay(2000);
     } else {
       WhichSensorIsSet = 1;               // store 1 because u1 sensor is the first to trip
       JustHadACountOn = 0;
@@ -47,6 +80,7 @@ void loop () {
       goingOUT++; 
       WhichSensorIsSet = 0;                // reset: we have a count !
       JustHadACountOn = 2;
+      delay(2000);
     } else {
       WhichSensorIsSet = 2;                //store 2 because u2 was the first to trip
       JustHadACountOn = 0;
@@ -71,8 +105,42 @@ void loop () {
   Serial.println(goingOUT);
 
   Serial.println("--------------------");
+
+  /**** Store to SD only after 20 or so loops. Ideally, every 60 mins. ********/
+  if (isTimeToSD == 20 ){
+    dataString = "'data':{'Date': '" + getDate() + "', 'Time': '" + getTime() + "', 'TotalIN':'" + goingIN + "', 'TotalOUT': '" + goingOUT + "'},";
+    fwriteToSD();
+    isTimeToSD = 0;
+    //records = records + records.toInt() + 1;
+  } else {
+    isTimeToSD++;
+  }
+  
+  sendToWeb(); 
+ 
   delay(1000);
 }
+
+
+int fwriteToSD(){
+  // open the file. note that only one file can be open at a time,
+  // so you have to close this one before opening another.
+  File dataFile = SD.open("footie/datalog.txt", FILE_WRITE);
+
+  // if the file is available, write to it:
+  if (dataFile) {
+    dataFile.println(dataString);
+    dataFile.close();
+    // print to the serial port too:
+    Serial.println(dataString);
+  }  
+  // if the file isn't open, pop up an error:
+  else {
+    Serial.println("error opening footie/datalog.txt");
+  } 
+
+}
+
 
 int ping() {
   u1 = u2 = 0;  //reset sensors. This ensures that only the tripped sensor(s) are set in each loop
@@ -115,4 +183,50 @@ int ping() {
 //    }
   }
 
+}
+
+String getDate(){
+  return "2014-11-02";
+}
+
+String getTime(){
+  return "20:00";
+}
+
+int sendToWeb() {
+ // if you get a connection, report back via serial:
+  if (client.connect(server, 80)) {
+    Serial.println("connected");
+ 
+    // Make a HTTP request:
+    client.print("GET /?TotalIN=");
+    client.print(goingIN);
+    client.print("&TotalOUT=");
+    client.println(goingOUT);
+    client.println("Host: api.smartbot.in/footie");
+    client.println("Connection: close");
+    client.println();
+  } 
+  else {
+    // kf you didn't get a connection to the server:
+    Serial.println("connection failed");
+  }
+
+  // if there are incoming bytes available 
+  // from the server, read them and print them:
+  if (client.available()) {
+    char c = client.read();
+    Serial.print(c);
+  }
+
+  // if the server's disconnected, stop the client:
+  if (!client.connected()) {
+    Serial.println();
+    Serial.println("disconnecting.");
+    client.stop();
+
+    // do nothing forevermore:
+    while(true);
+  }
+ 
 }

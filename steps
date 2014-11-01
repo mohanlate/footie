@@ -1,0 +1,14 @@
+Assumptions:
+
+1. The distance between the two sensors is not more than the width of the body passing through. This width is called zone.
+
+This means that there are 3 triggers
+a. Sensor1 has triggered but Sensor2 is normal. This is when body enters the zone from either side
+b. Sensor2 has triggered while Sensor1 is still triggered. This is when the body has fully covered the entire zone
+c. Sensor1 goes to normal but Sensor 2 is still triggered. This is when the body is leaving the other side
+
+
+2. If the state where both sensors are not triggered does not occur, ignore count because something very thin (like a hand of leg) triggered it.
+
+3. 
+
